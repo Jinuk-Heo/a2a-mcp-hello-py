@@ -2,9 +2,6 @@
 
 import os
 import uvicorn  # type: ignore
-from dotenv import load_dotenv  # type: ignore
-
-load_dotenv()
 
 from a2a.server.apps import A2AStarletteApplication  # type: ignore
 from a2a.server.request_handlers import DefaultRequestHandler  # type: ignore
