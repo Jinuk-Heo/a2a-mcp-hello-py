@@ -16,7 +16,7 @@ from agent_executor import HelloMCPAgentExecutor  # type: ignore
 
 MCP_SERVER_URL = os.environ.get(
     "MCP_SERVER_URL",
-    "https://mcp-hello-py-666155174404.asia-northeast3.run.app/mcp"
+    "https://mcp-hello-py-666155174404.asia-northeast3.run.app"
 )
 
 SERVICE_URL = os.environ.get("SERVICE_URL", "")
