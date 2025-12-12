@@ -1,38 +1,30 @@
 """A2A Server for Hello MCP Agent."""
-
 import os
-import uvicorn  # type: ignore
+import uvicorn
+import requests # 이 줄 때문에 위 1단계가 필수입니다.
 
-from a2a.server.apps import A2AStarletteApplication  # type: ignore
-from a2a.server.request_handlers import DefaultRequestHandler  # type: ignore
-from a2a.server.tasks import InMemoryTaskStore  # type: ignore
-from a2a.types import AgentCapabilities, AgentCard, AgentSkill  # type: ignore
+from a2a.server.apps import A2AStarletteApplication
+from a2a.server.request_handlers import DefaultRequestHandler
+from a2a.server.tasks import InMemoryTaskStore
+from a2a.types import AgentCapabilities, AgentCard, AgentSkill
+from agent_executor import HelloMCPAgentExecutor
 
-from agent_executor import HelloMCPAgentExecutor  # type: ignore
-
-
-# 여기가 핵심입니다! 날씨 정보는 "잘 작동하는 외부 서버(666155)"에서 가져옵니다.
+# ★ 중요: 날씨 전문가는 '옛날 집(666155)'에 있습니다. 여기로 연결합니다.
 MCP_SERVER_URL = os.environ.get(
     "MCP_SERVER_URL",
     "https://mcp-hello-py-hjk-666155174404.asia-northeast3.run.app"
 )
 
-# 이 서비스(Agent) 자신의 주소입니다.
+# 내 주소(통역사)는 자동으로 가져옵니다.
 SERVICE_URL = os.environ.get("SERVICE_URL", "")
 
-
 def create_agent_card(host: str, port: int) -> AgentCard:
-    """Create the A2A Agent Card."""
     skill = AgentSkill(
         id="korean_greeting",
         name="Korean Greeting",
-        description="이름을 받아 한국어로 인사합니다. MCP Hello Server를 사용합니다.",
-        tags=["greeting", "korean", "mcp"],
-        examples=[
-            "김철수에게 인사해줘",
-            "이영희, 박민수에게 인사해줘",
-            "안녕하세요",
-        ],
+        description="인사와 날씨 정보를 제공합니다.",
+        tags=["greeting", "weather"],
+        examples=["안녕", "강남구 날씨 어때?"],
     )
 
     if SERVICE_URL:
@@ -42,7 +34,7 @@ def create_agent_card(host: str, port: int) -> AgentCard:
 
     return AgentCard(
         name="Hello MCP Agent",
-        description="MCP Hello Server를 사용하여 한국어로 인사하는 A2A 에이전트입니다.",
+        description="MCP 서버와 연결된 A2A 에이전트입니다.",
         url=agent_url,
         version="1.0.0",
         default_input_modes=["text"],
@@ -51,14 +43,13 @@ def create_agent_card(host: str, port: int) -> AgentCard:
         skills=[skill],
     )
 
-
 def main():
-    """Main entry point."""
     host = os.environ.get("HOST", "0.0.0.0")
-    port = int(os.environ.get("PORT", 8080)) # 포트 기본값을 8080으로 안전하게 지정
+    port = int(os.environ.get("PORT", 8080))
 
     agent_card = create_agent_card(host, port)
-
+    
+    # 여기서 MCP 서버(666155)와 연결을 맺습니다.
     request_handler = DefaultRequestHandler(
         agent_executor=HelloMCPAgentExecutor(MCP_SERVER_URL),
         task_store=InMemoryTaskStore(),
@@ -69,12 +60,10 @@ def main():
         http_handler=request_handler,
     )
 
-    print(f"Starting A2A Hello MCP Agent on {host}:{port}")
-    print(f"MCP Server URL (Weather): {MCP_SERVER_URL}")
-    print(f"Service URL (Me): {SERVICE_URL}")
+    print(f"Agent(Me): {SERVICE_URL}")
+    print(f"MCP(Target): {MCP_SERVER_URL}")
 
     uvicorn.run(server.build(), host=host, port=port)
-
 
 if __name__ == "__main__":
     main()
