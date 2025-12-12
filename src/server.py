@@ -11,11 +11,13 @@ from a2a.types import AgentCapabilities, AgentCard, AgentSkill  # type: ignore
 from agent_executor import HelloMCPAgentExecutor  # type: ignore
 
 
+# 여기가 핵심입니다! 날씨 정보는 "잘 작동하는 외부 서버(666155)"에서 가져옵니다.
 MCP_SERVER_URL = os.environ.get(
     "MCP_SERVER_URL",
-    "https://mcp-hello-py-666155174404.asia-northeast3.run.app"
+    "https://mcp-hello-py-hjk-666155174404.asia-northeast3.run.app"
 )
 
+# 이 서비스(Agent) 자신의 주소입니다.
 SERVICE_URL = os.environ.get("SERVICE_URL", "")
 
 
@@ -53,7 +55,7 @@ def create_agent_card(host: str, port: int) -> AgentCard:
 def main():
     """Main entry point."""
     host = os.environ.get("HOST", "0.0.0.0")
-    port = int(os.environ.get("PORT", 9999))
+    port = int(os.environ.get("PORT", 8080)) # 포트 기본값을 8080으로 안전하게 지정
 
     agent_card = create_agent_card(host, port)
 
@@ -68,8 +70,8 @@ def main():
     )
 
     print(f"Starting A2A Hello MCP Agent on {host}:{port}")
-    print(f"MCP Server URL: {MCP_SERVER_URL}")
-    print(f"Service URL: {SERVICE_URL or f'http://{host}:{port}/'}")
+    print(f"MCP Server URL (Weather): {MCP_SERVER_URL}")
+    print(f"Service URL (Me): {SERVICE_URL}")
 
     uvicorn.run(server.build(), host=host, port=port)
 
